@@ -611,8 +611,7 @@ Instructions:
         verbose=False,
     )
 
-    result = crew.kickoff()
-    return result.raw if hasattr(result, "raw") else str(result)
+    
 
 
 # -----------------------------
