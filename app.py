@@ -1097,14 +1097,14 @@ if learning_mode == "Personalized Learning":
             items = []
 
             if uploaded:
-    items.extend(
-        {
-            "name": f.name,
-            "bytes": f.getvalue(),
-            "source_path": "User uploaded document",
-        }
-        for f in uploaded
-    )
+                items.extend(
+                    {
+                         "name": f.name,
+                        "bytes": f.getvalue(),
+                        "source_path": "User uploaded document",
+                    }
+                    for f in uploaded
+              )
 
             if drive_url.strip():
                 try:
