@@ -691,7 +691,7 @@ def load_drive_file(url):
     if Path(real_filename).suffix.lower() not in SUPPORTED_EXTENSIONS:
         real_filename = f"{real_filename}{ext}"
         
- default_names = {
+    default_names = {
         ".pdf": "Google Drive document.pdf",
         ".docx": "Google Drive document.docx",
         ".txt": "Google Drive document.txt",
