@@ -712,78 +712,51 @@ def load_drive_file(url):
 
 def load_drive_folder(url):
     """
-    Download a public Google Drive folder recursively.
+    Download a public Google Drive folder recursively and return only
+    supported study documents.
 
-    Each file keeps:
-        - actual filename
-        - relative Drive folder path
-        - Google Drive source type
+    The original filenames and relative folder paths are preserved.
     """
-
     with tempfile.TemporaryDirectory() as temp_dir:
-
-        download_root = (
-            Path(temp_dir) / "drive_folder"
-        )
-
-        download_root.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        download_root = Path(temp_dir) / "drive_folder"
+        download_root.mkdir(parents=True, exist_ok=True)
 
         try:
-
             result = gdown.download_folder(
                 url=url,
                 output=str(download_root),
                 quiet=True,
                 use_cookies=False,
             )
-
         except Exception as exc:
-
             raise ValueError(
-                "Google Drive folder download failed. "
-                "Make sure the folder is shared as "
-                "Anyone with the link / Viewer."
+                "Google Drive folder download failed. Make sure the folder "
+                "is shared as Anyone with the link / Viewer."
             ) from exc
 
+        # gdown returns downloaded file descriptors in current versions,
+        # but scanning the output directory is more robust across releases.
         paths = [
-            p
-            for p in download_root.rglob("*")
+            p for p in download_root.rglob("*")
             if p.is_file()
         ]
 
+        # Some gdown versions may place files one level below the requested
+        # directory. If scanning is empty, also inspect returned paths.
         if not paths and result:
-
             for item in result:
-
-                candidate = getattr(
-                    item,
-                    "path",
-                    None
-                )
-
+                candidate = getattr(item, "path", None)
                 if candidate:
-
-                    candidate_path = Path(
-                        candidate
-                    )
-
-                    if (
-                        candidate_path.exists()
-                        and candidate_path.is_file()
-                    ):
-                        paths.append(
-                            candidate_path
-                        )
+                    candidate_path = Path(candidate)
+                    if candidate_path.exists() and candidate_path.is_file():
+                        paths.append(candidate_path)
 
         supported = []
 
         for path in paths:
-
             ext = path.suffix.lower()
 
+            # Never ingest HTML pages, Google Drive metadata or unknown binaries.
             if ext not in SUPPORTED_EXTENSIONS:
                 continue
 
@@ -794,40 +767,23 @@ def load_drive_folder(url):
                 path.name,
             )
 
-            if (
-                detected
-                not in SUPPORTED_EXTENSIONS
-            ):
+            if detected not in SUPPORTED_EXTENSIONS:
                 continue
 
-            # Preserve relative Drive folder structure
-            relative = (
-                path
-                .relative_to(download_root)
-                .as_posix()
-            )
-
+            relative = path.relative_to(download_root).as_posix()
+            
             supported.append(
                 {
                     "name": path.name,
                     "bytes": file_bytes,
-
-                    # Actual Drive path
                     "source_path": relative,
-
-                    # IMPORTANT:
-                    # Source category is Google Drive
-                    "source_type":
-                        "Google Drive document",
                 }
             )
 
         if not supported:
-
             raise ValueError(
-                "The Google Drive folder was downloaded, "
-                "but no supported PDF, DOCX, TXT or MD "
-                "files were found."
+                "The Google Drive folder was downloaded, but no supported "
+                "PDF, DOCX, TXT or MD files were found."
             )
 
         return supported
