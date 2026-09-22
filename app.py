@@ -767,12 +767,18 @@ def load_drive_folder(url):
                 continue
 
             relative = path.relative_to(download_root).as_posix()
-
+            
+       default_names = {
+        ".pdf": "Google Drive document.pdf",
+        ".docx": "Google Drive document.docx",
+        ".txt": "Google Drive document.txt",
+        ".md": "Google Drive document.md",
+    }
             supported.append(
                 {
                     "name": path.name,
                     "bytes": file_bytes,
-                    "source_path": relative,
+                    "source_path": default_names[ext],
                 }
             )
 
