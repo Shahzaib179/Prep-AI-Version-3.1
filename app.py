@@ -943,11 +943,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.divider()
-    st.header("Retrieval Settings")
-    chunk_size = st.slider("Chunk size (words)", 300, 1800, 900, 100)
-    overlap = st.slider("Chunk overlap (words)", 0, 400, 150, 25)
-    top_k = st.slider("Retrieved chunks", 2, 15, 8)
-    semantic_weight = st.slider("Semantic search weight", 0.0, 1.0, 0.7, 0.05)
+    
 
 
 
