@@ -696,7 +696,7 @@ def load_drive_file(url):
         ".docx": "Google Drive document.docx",
         ".txt": "Google Drive document.txt",
         ".md": "Google Drive document.md",
-     
+    }
     return [
         {
             "name": real_filename,
