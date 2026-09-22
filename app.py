@@ -695,7 +695,7 @@ def load_drive_file(url):
         {
             "name": real_filename,
             "bytes": file_bytes,
-            "source_path": real_filename,
+            "source_path": Google Drive document[ext],
         }
     ]
 
