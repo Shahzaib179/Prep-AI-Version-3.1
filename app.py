@@ -38,6 +38,8 @@ DATABASE_SUBJECTS = ["Biology", "Chemistry", "Physics", "English"]
 # -----------------------------
 # Document extraction
 # -----------------------------
+# Document extraction
+# -----------------------------
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md"}
 
 
@@ -59,7 +61,7 @@ def extract_pdf(file_bytes, filename, source_path=None):
                 {
                     "text": text,
                     "filename": filename,
-                    "source_path": source_path or filename,
+                    "source_path": source_path or "User uploaded document",
                     "page": page_number,
                     "page_count": total_pages,
                 }
@@ -86,7 +88,7 @@ def extract_docx(file_bytes, filename, source_path=None):
             {
                 "text": text,
                 "filename": filename,
-                "source_path": source_path or filename,
+                "source_path": source_path or "User uploaded document",
                 "page": None,
                 "page_count": None,
             }
@@ -106,7 +108,7 @@ def extract_txt(file_bytes, filename, source_path=None):
             {
                 "text": text,
                 "filename": filename,
-                "source_path": source_path or filename,
+                "source_path": source_path or "User uploaded document",
                 "page": None,
                 "page_count": None,
             }
@@ -132,7 +134,7 @@ def extract_md(file_bytes, filename, source_path=None):
             {
                 "text": text,
                 "filename": filename,
-                "source_path": source_path or filename,
+                "source_path": source_path or "User uploaded document",
                 "page": None,
                 "page_count": None,
             }
@@ -202,7 +204,6 @@ def extract_document(file_bytes, filename, source_path=None):
         return extract_md(file_bytes, filename, source_path)
 
     raise ValueError(f"Unsupported file type: {ext}")
-
 
 # -----------------------------
 # Chunking
