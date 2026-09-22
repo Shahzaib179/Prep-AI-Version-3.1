@@ -640,17 +640,21 @@ def is_drive_file_url(url):
 
 def load_drive_file(url):
     """
-    Download a single public Google Drive file.
+    Download one public Google Drive file while preserving its real
+    Google Drive filename.
 
-    gdown >= 6 automatically parses supported Drive share links.
-    No fuzzy=True is used because that argument was removed in current gdown.
+    Do NOT give gdown a fake output filename such as "drive_download".
+    Current gdown can resolve the real Drive filename when the output
+    argument is a directory.
     """
     with tempfile.TemporaryDirectory() as temp_dir:
-        output_path = Path(temp_dir) / "drive_download"
+        output_dir = Path(temp_dir)
 
+        # A directory output tells current gdown to use the filename
+        # reported by Google Drive.
         downloaded = gdown.download(
             url=url,
-            output=str(output_path),
+            output=str(output_dir) + os.sep,
             quiet=True,
             use_cookies=False,
         )
@@ -662,28 +666,36 @@ def load_drive_file(url):
             )
 
         path = Path(downloaded)
+
+        if not path.exists() or not path.is_file():
+            raise ValueError(
+                "Google Drive download completed but the downloaded file "
+                "could not be located."
+            )
+
         file_bytes = path.read_bytes()
 
-    ext = detect_content_extension(file_bytes, url)
+        # This is the actual filename reported by Google Drive.
+        real_filename = path.name
+
+    ext = detect_content_extension(file_bytes, real_filename)
 
     if not ext:
         raise ValueError(
-            "Google Drive file type could not be detected. "
+            f"Unsupported Google Drive file type: {real_filename!r}. "
             "Supported formats are PDF, DOCX, TXT and MD."
         )
 
-    default_names = {
-        ".pdf": "Google Drive document.pdf",
-        ".docx": "Google Drive document.docx",
-        ".txt": "Google Drive document.txt",
-        ".md": "Google Drive document.md",
-    }
+    # Normally the real filename already has the correct extension.
+    # Only add one when Drive returns an extensionless text file.
+    if Path(real_filename).suffix.lower() not in SUPPORTED_EXTENSIONS:
+        real_filename = f"{real_filename}{ext}"
 
     return [
         {
-            "name": default_names[ext],
+            "name": real_filename,
             "bytes": file_bytes,
-            "source_path": default_names[ext],
+            "source_path": real_filename,
         }
     ]
 
