@@ -690,12 +690,18 @@ def load_drive_file(url):
     # Only add one when Drive returns an extensionless text file.
     if Path(real_filename).suffix.lower() not in SUPPORTED_EXTENSIONS:
         real_filename = f"{real_filename}{ext}"
-
+        
+ default_names = {
+        ".pdf": "Google Drive document.pdf",
+        ".docx": "Google Drive document.docx",
+        ".txt": "Google Drive document.txt",
+        ".md": "Google Drive document.md",
+     
     return [
         {
             "name": real_filename,
             "bytes": file_bytes,
-            "source_path": Google Drive document[ext],
+            "source_path":default_names[ext],
         }
     ]
 
