@@ -926,7 +926,11 @@ with st.sidebar:
         "Change UI color", list(color_options),
         index=list(color_options).index(st.session_state["ui_color"]),
     )
-    models = ["gemini-3.5-flash-lite"]
+    models = [
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash",
+    ]
     st.session_state["selected_model"] = st.selectbox(
         "LLM Model", models,
         index=0,
@@ -944,10 +948,10 @@ with st.sidebar:
     overlap = st.slider("Chunk overlap (words)", 0, 400, 150, 25)
     top_k = st.slider("Retrieved chunks", 2, 15, 8)
     semantic_weight = st.slider("Semantic search weight", 0.0, 1.0, 0.7, 0.05)
-    st.info("Add GEMINI_API_KEY to Streamlit secrets. Never hardcode it in app.py.")
 
 
-st.title("🎓 Prep AI V3.1")
+
+st.title("🎓 Prep AI")
 st.caption("Advanced RAG + Agentic Learning — Personalized, Database, and Prep AI Agent")
 
 st.subheader("1. Choose Learning Mode")
@@ -1026,9 +1030,7 @@ if learning_mode == "Prep AI Agent":
         if result.startswith("NEEDS_INPUT:"):
             st.warning(result.replace("NEEDS_INPUT:", "", 1).strip())
             st.info("Enter the missing information in the request box above and run the agent again.")
-        else:
-            st.subheader("🤖 Prep AI Agent Result")
-            st.markdown(result)
+        
 
             if st.session_state["agent_sources"]:
                 st.subheader("🌐 Web Sources")
