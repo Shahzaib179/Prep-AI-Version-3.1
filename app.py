@@ -715,7 +715,8 @@ def load_drive_folder(url):
     Download a public Google Drive folder recursively and return only
     supported study documents.
 
-    The original filenames and relative folder paths are preserved.
+    The original filenames are preserved.
+    Source is shown as Google Drive document type.
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         download_root = Path(temp_dir) / "drive_folder"
@@ -734,20 +735,19 @@ def load_drive_folder(url):
                 "is shared as Anyone with the link / Viewer."
             ) from exc
 
-        # gdown returns downloaded file descriptors in current versions,
-        # but scanning the output directory is more robust across releases.
+        # Find all downloaded files
         paths = [
             p for p in download_root.rglob("*")
             if p.is_file()
         ]
 
-        # Some gdown versions may place files one level below the requested
-        # directory. If scanning is empty, also inspect returned paths.
+        # Fallback for gdown versions that return downloaded paths
         if not paths and result:
             for item in result:
                 candidate = getattr(item, "path", None)
                 if candidate:
                     candidate_path = Path(candidate)
+
                     if candidate_path.exists() and candidate_path.is_file():
                         paths.append(candidate_path)
 
@@ -756,7 +756,7 @@ def load_drive_folder(url):
         for path in paths:
             ext = path.suffix.lower()
 
-            # Never ingest HTML pages, Google Drive metadata or unknown binaries.
+            # Ignore unsupported files
             if ext not in SUPPORTED_EXTENSIONS:
                 continue
 
@@ -770,13 +770,24 @@ def load_drive_folder(url):
             if detected not in SUPPORTED_EXTENSIONS:
                 continue
 
-            relative = path.relative_to(download_root).as_posix()
-            
+            # Source label shown in Document Information
+            default_names = {
+                ".pdf": "Google Drive document.pdf",
+                ".docx": "Google Drive document.docx",
+                ".txt": "Google Drive document.txt",
+                ".md": "Google Drive document.md",
+            }
+
+            source_name = default_names.get(
+                detected,
+                "Google Drive document"
+            )
+
             supported.append(
                 {
                     "name": path.name,
                     "bytes": file_bytes,
-                    "source_path": relative,
+                    "source_path": source_name,
                 }
             )
 
